@@ -28,25 +28,19 @@ public class ProductListDemo {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// 1. データベース接続関連オブジェクトの初期化
-		Connection conn = null;         // データベース接続オブジェクト
-		PreparedStatement pstmt = null; // SQL実行オブジェクト
-		ResultSet rs = null;            // SQL実行結果セット
 		
-		// 2. 実行するSQLの設定
+		// 1. 実行するSQLの設定
 		String sql = "SELECT * FROM products ORDER BY id";
 		
-		try {
-			// 3. データベースに接続：データベース接続オブジェクトの取得
-			conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+		try ( // 2.1 データベース接続オブジェクトの取得
+			  Connection  conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+			  // 2.2 SQL実行オブジェクトの取得
+			  PreparedStatement pstmt = conn.prepareStatement(sql);
+			  // 2.3 SQLの実行と結果セットの取得
+			  ResultSet rs = pstmt.executeQuery();
+			) {
 			
-			// 4. SQL実行オブジェクトの取得
-			pstmt = conn.prepareStatement(sql);
-			
-			// 5. SQLの実行と結果セットの取得
-			rs = pstmt.executeQuery();
-			
-			// 6. 結果セットを商品リストに変換
+			// 3. 結果セットを商品リストに変換
 			List<Product> list= new ArrayList<>();
 			while(rs.next()) {
 				Product entity = new Product();
@@ -57,9 +51,7 @@ public class ProductListDemo {
 				list.add(entity);
 			}
 			
-			rs.close(); // 不要になったので解放
-			
-			// 7. 商品リストの要素を表示
+			// 4. 商品リストの要素を表示
 			System.out.printf("%-6s\t%-10s\t%-6s\t%-3s\n", "商品ID", "商品名", "価格", "在庫数");
 			for (Product product : list) {
 				System.out.printf("%-6s\t%-10s\t%-6s\t%-3s\n", 
@@ -71,22 +63,6 @@ public class ProductListDemo {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} finally {
-			// 8. データベース接続関連オブジェクトの解放
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (conn != null) {
-					conn.close();
-					conn = null;
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 		}
 		
 	}
