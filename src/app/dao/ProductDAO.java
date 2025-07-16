@@ -27,7 +27,41 @@ public class ProductDAO {
 	// SQL文字列定数
 	private static final String SQL_FIND_ALL = "SELECT * FROM products ORDER BY id";
 	private static final String SQL_FIND_BY_ID  = "SELECT * FROM products WHERE id = ?";
+	private static final String SQL_FIND_BY_NAME = "SELECT * FROM products WHERE name LIKE ?";
 	
+
+	/**
+	 * 商品名にキーワードを含む商品を取得する
+	 * @param keyword 検索キーワード
+	 * @return 商品リスト
+	 * @throws SQLException
+	 */
+	public List<Product> findByName(String keyword) throws SQLException {
+		try ( // 1.1 データベース接続オブジェクトの取得
+			  Connection  conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+			  // 1.2 SQL実行オブジェクトの取得
+			  PreparedStatement pstmt = conn.prepareStatement(SQL_FIND_BY_NAME);) {
+			// 2. プレースホルダをパラメータに置換
+			pstmt.setString(1, "%" + keyword + "%");
+			
+			try ( // 3 データベース接続オブジェクトの取得
+				  ResultSet rs = pstmt.executeQuery();) {
+				// 4. 結果セットを商品リストに変換
+				List<Product> list = convertToEntityList(rs);
+				// 5. 商品リストの返却
+				return list;
+			}
+		}
+	}
+
+	
+	
+	/**
+	 * 商品IDが合致する商品を取得する
+	 * @param id 商品ID
+	 * @return 商品インスタンス
+	 * @throws SQLException
+	 */
 	public Product findById(int id) throws SQLException {
 		try ( // 1.1 データベース接続オブジェクトの取得
 			  Connection  conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
