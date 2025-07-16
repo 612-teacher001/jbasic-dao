@@ -43,21 +43,42 @@ public class ProductDAO {
 			) {
 			
 			// 3. 結果セットを商品リストに変換
-			List<Product> list= new ArrayList<>();
-			while(rs.next()) {
-				Product entity = new Product();
-				entity.setId(rs.getInt("id"));
-				entity.setName(rs.getString("name"));
-				entity.setPrice(rs.getInt("price"));
-				entity.setStock(rs.getInt("stock"));
-				list.add(entity);
-			}
+			List<Product> list = convertToEntityList(rs);
 			
 			// 4. 商品リストの返却
 			return list;
 			
 		}
 	}
-	
+
+	/**
+	 * 結果セットからエンティティリストに変換する
+	 * @param rs 結果セット
+	 * @return エンティティリスト
+	 * @throws SQLException
+	 */
+	private List<Product> convertToEntityList(ResultSet rs) throws SQLException {
+		List<Product> list = new ArrayList<Product>();
+		while(rs.next()) {
+			Product entity  = convertToEntity(rs);
+			list.add(entity);
+		}
+		return list;
+	}
+
+	/**
+	 * 結果セットのレコードをエンティティクラスに変換する
+	 * @param rs 結果セット
+	 * @return エンティティのインスタンス
+	 * @throws SQLException
+	 */
+	private Product convertToEntity(ResultSet rs) throws SQLException {
+		Product entity = new Product();
+		entity.setId(rs.getInt("id"));
+		entity.setName(rs.getString("name"));
+		entity.setPrice(rs.getInt("price"));
+		entity.setStock(rs.getInt("stock"));
+		return entity;
+	}	
 	
 }
