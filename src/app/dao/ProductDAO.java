@@ -26,6 +26,25 @@ public class ProductDAO {
 	
 	// SQL文字列定数
 	private static final String SQL_FIND_ALL = "SELECT * FROM products ORDER BY id";
+	private static final String SQL_FIND_BY_ID  = "SELECT * FROM products WHERE id = ?";
+	
+	public Product findById(int id) throws SQLException {
+		try ( // 1.1 データベース接続オブジェクトの取得
+			  Connection  conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+			  // 1.2 SQL実行オブジェクトの取得
+			  PreparedStatement pstmt = conn.prepareStatement(SQL_FIND_BY_ID);) {
+			// 2. プレースホルダをパラメータに置換
+			pstmt.setInt(1, id);
+			
+			try ( // 3 データベース接続オブジェクトの取得
+				  ResultSet rs = pstmt.executeQuery();) {
+				// 4. 結果セットから商品インスタンスを取得
+				List<Product> list = convertToEntityList(rs);
+				// 5. 商品インスタンスの返却
+				return list.get(0);
+			}
+		}
+	}	
 	
 	/**
 	 * productsテーブルのすべてのレコードを取得する
@@ -35,7 +54,7 @@ public class ProductDAO {
 	public List<Product> findAll() throws SQLException {
 		
 		try ( // 2.1 データベース接続オブジェクトの取得
-			  Connection  conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+			  Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
 			  // 2.2 SQL実行オブジェクトの取得
 			  PreparedStatement pstmt = conn.prepareStatement(SQL_FIND_ALL);
 			  // 2.3 SQLの実行と結果セットの取得
@@ -79,6 +98,6 @@ public class ProductDAO {
 		entity.setPrice(rs.getInt("price"));
 		entity.setStock(rs.getInt("stock"));
 		return entity;
-	}	
-	
+	}
+
 }
